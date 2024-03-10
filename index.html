@@ -55,9 +55,9 @@
     loginBtn.style.display = 'none';
     // Read the data from github
     const result = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-      owner: 'julienperret',
-      repo: 'hello-world',
-      path: 'map.geojson',
+      owner: 'subdense',
+      repo: 'data',
+      path: 'test.geojson',
       headers: { 'X-GitHub-Api-Version': '2022-11-28' }
     });
     const text = atob(result.data.content);
