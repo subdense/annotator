@@ -10,11 +10,13 @@
   <!-- Extension Géoportail pour Leaflet -->
   <script src="https://ignf.github.io/geoportal-extensions/leaflet-latest/dist/GpPluginLeaflet.js"></script>
   <link rel="stylesheet" href="https://ignf.github.io/geoportal-extensions/leaflet-latest/dist/GpPluginLeaflet.css" />
-  <!-- Leaflet easy button-->
+  <!-- Leaflet easy button -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
   <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
-  <!-- Leaflet Sync-->
+  <!-- Leaflet Sync -->
   <script src="./L.Map.Sync.js"></script>
+  <!-- Bootstrap icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 	<style>
 		html, body { height: 100%; margin: 0; }
 		#container {
@@ -30,14 +32,42 @@
     #mapLeft, #mapRight { width: 50%; height: 100%; }
     #mapLeft { float: left; }
     #mapRight { float: right; }
+    #center { position:absolute; text-align: center; width: 720px; bottom: 200px; left:50%;transform: translate(-50%, 0); z-index: 500;}
+    #bottom-center { position:absolute; text-align: center; width: 105px; bottom: 60px;left:50%;transform: translate(-50%, 0); z-index: 500;}
     .my-control { background-color : rgba(255,255,255,0.5); text-align: 'left' }
+    .top-button {
+      top: 40%;
+    }
+    .middle-button {
+      /* top: 60%; */
+      display: inline-block;
+      position: relative;
+    }
+    .bottom-button {
+      /* top: 80%; */
+      display: inline-block;
+      position: relative;
+    }
     .my-button {
       background-color: white;
       z-index: 500;
+      margin: 30px;
+    }
+    .my-button .label {
+      visibility: visible;
+      width: 100px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px 0;
       position: absolute;
-      top: 80%;
-      -ms-transform: translate(-50%, 0);
-      transform: translate(-50%, 0);
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -60px;
+      opacity: 1;
+      transition: opacity 0.3s;
     }
     .my-button .tooltiptext {
       visibility: hidden;
@@ -72,7 +102,7 @@
 	</style>
 </head>
 <body>
-  <div id="top">
+  <div id="top" hidden="hidden">
     <label for="token" id="tokenLabel">GitHub TOKEN:</label>
     <input type="password" id="token" title="Paste your token from GitHub">
     <button class="login" id="login">Login</button>
@@ -80,11 +110,14 @@
   <div id="container">
     <div id="mapLeft" class="map"></div>
     <div id="mapRight" class="map"></div>
+    <div id="center" class='center'></div>
+    <div id="bottom-center" class='bottom-center'></div>
   </div>
 </body>
 <script type="module">
   // Login to github with octokit and a github token
   import { Octokit, App } from "https://esm.sh/octokit";
+  let login;
   let octokit;
   let files;
   let currentFileIndex;
@@ -100,24 +133,28 @@
     let fileContent = JSON.parse(text), sha = result.data.sha;
     return { fileContent, sha };
   }
-  let loginBtn = document.querySelector('.login');
-  loginBtn.addEventListener('click', async () => {
-    octokit = new Octokit({ auth: document.getElementById("token").value });
+  const token = localStorage.getItem("token");
+  async function authenticate(token) {
+    octokit = new Octokit({ auth: token });
     const { data: { login } } = await octokit.rest.users.getAuthenticated();
-    // console.log("Hello, %s", login);
+    return login;
+  }
+  let loginBtn = document.querySelector('.login');
+  function showLogin() {
     // hide the login informations
-    document.getElementById('tokenLabel').setAttribute("hidden", "hidden");
-    document.getElementById('token').setAttribute("hidden", "hidden");
-    loginBtn.style.display = 'none';
+    document.getElementById('top').removeAttribute("hidden");
+  }
+  function hideLogin() {
+    // hide the login informations
+    document.getElementById('top').setAttribute("hidden", "hidden");
+  }
+  async function readFileListAndCreateMaps() {
     // Read the files from github
     const jsonFileContent = await readJSONFile('list.json')
     const jsonContent = jsonFileContent.fileContent;
-    // console.log(jsonContent);
     const dates = jsonContent["dates"];
     const wmts = jsonContent["wmts"];
     files = jsonContent["files"];
-    // console.log(files);
-    // console.log(files.length);
     const mapLeft  = L.map('mapLeft');
     const mapRight = L.map('mapRight');
     // Add a label on top right with user login
@@ -126,8 +163,7 @@
         var div = L.DomUtil.create('div','leaflet-bar my-control');
         div.innerHTML = login;
         return div;
-      },
-      onRemove: function(map) {}
+      }
     });
     let myLoginControl = new LoginControl({position: 'bottomleft'}).addTo(mapLeft);
     let DateControlL = L.Control.extend({
@@ -135,8 +171,7 @@
         var div = L.DomUtil.create('div','leaflet-bar my-control');
         div.innerHTML = dates[0];
         return div;
-      },
-      onRemove: function(map) {}
+      }
     });
     let myDateControlL = new DateControlL().addTo(mapLeft);
     let DateControlR = L.Control.extend({
@@ -144,78 +179,91 @@
         var div = L.DomUtil.create('div','leaflet-bar my-control');
         div.innerHTML = dates[1];
         return div;
-      },
-      onRemove: function(map) {}
+      }
     });
     let myDateControlR = new DateControlR().addTo(mapRight);
     // Création de la couche
-    var lyrLeft = L.geoportalLayer.WMTS({ layer  : wmts[0] },{
-      maxZoom: 20,
-      maxNativeZoom: 18
-    });
-    var lyrRight = L.geoportalLayer.WMTS({ layer  : wmts[1] },{
-      maxZoom: 20,
-      maxNativeZoom: 18
-    });
+    var lyrLeft = L.geoportalLayer.WMTS({ layer  : wmts[0] },{ maxZoom: 20, maxNativeZoom: 18 });
+    var lyrRight = L.geoportalLayer.WMTS({ layer  : wmts[1] },{ maxZoom: 20, maxNativeZoom: 18 });
     lyrLeft.addTo(mapLeft);
     lyrRight.addTo(mapRight);
-
     const ZoomViewer = L.Control.extend({
       onAdd() {
         const gauge = L.DomUtil.create('div','leaflet-bar my-control');
-        mapRight.on('zoomstart zoom zoomend', (ev) => {
-          gauge.innerHTML = `Zoom level: ${mapRight.getZoom()}`;
-        });
+        mapRight.on('zoomstart zoom zoomend', (ev) => { gauge.innerHTML = `Zoom level: ${mapRight.getZoom()}`; });
         return gauge;
       }
     });
     const zoomViewer = (new ZoomViewer({position: 'bottomleft'})).addTo(mapRight);
     // Read the next file from github
     async function readNextJSONFile() {
-      if (currentFileIndex === undefined) {
-        currentFileIndex = 0;
-      } else {
-        currentFileIndex = (currentFileIndex + 1)%files.length;
-      }
+      if (currentFileIndex === undefined) { currentFileIndex = 0; } else { currentFileIndex = (currentFileIndex + 1)%files.length; }
       return readJSONFile(`data_${currentFileIndex}.geojson`);
     }
+    let leftRightStyle = {
+      "color": "#ff7800",
+      "weight": 5,
+      "opacity": 0.25,
+      "dashArray": "20 20",
+      "dashOffset": "10",
+      "fill": false
+    };
+    let leftLeftStyle = {
+      "color": "#78ff00",
+      "weight": 2,
+      "opacity": 0.8,
+      "fill": false
+    };
+    let rightRightStyle = {
+      "color": "#ff7800",
+      "weight": 2,
+      "opacity": 0.8,
+      "fill": false
+    };
+    let rightLeftStyle = {
+      "color": "#78ff00",
+      "weight": 5,
+      "opacity": 0.25,
+      "dashArray": "20 20",
+      "dashOffset": "10",
+      "fill": false
+    };
     let {fileContent,sha} = await readNextJSONFile();
-    let geoJSONLeft = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[0]; } });
-    let geoJSONRight = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[1]; } });
+    while (fileContent[login]) {
+      let content = await readNextJSONFile();
+      fileContent = content.fileContent;
+      sha = content.sha;
+    }
+    let geoJSONLeft = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[0]; }, style: leftLeftStyle });
+    let geoJSONLeftRight = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[1]; }, style: leftRightStyle });
+    let geoJSONRight = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[1]; }, style: rightRightStyle });
+    let geoJSONRightLeft = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[0]; }, style: rightLeftStyle });
     geoJSONLeft.addTo(mapLeft);
+    geoJSONLeftRight.addTo(mapLeft);
     geoJSONRight.addTo(mapRight);
+    geoJSONRightLeft.addTo(mapRight);
     mapLeft.setView(geoJSONRight.getBounds().getCenter(), 18);
     mapLeft.sync(mapRight);
     mapRight.sync(mapLeft);
     var newValue = fileContent[login];
-    let saveBtn = L.easyButton('<span class="save">S</span>', async () => {
-      // console.log("newValue=",newValue);
-      fileContent[login] = newValue
-      const theContent = btoa(JSON.stringify(fileContent));
-      await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-        owner: 'subdense',
-        repo: 'data',
-        path: `data_${currentFileIndex}.geojson`,
-        message: 'Data updated from annotator',
-        content: theContent,
-        sha: sha,
-        headers: { 'X-GitHub-Api-Version': '2022-11-28' }
-      });
-      console.log("all done!");
-    });
-    saveBtn.addTo(mapLeft);
-    let nextBtn = L.easyButton('<span class="next">N</span>', async () => {
+    async function nextJSONFile() {
       let nextFileContent = await readNextJSONFile();
       fileContent = nextFileContent.fileContent;
       sha = nextFileContent.sha;
       // remove previous geojsons
       geoJSONLeft.remove();
+      geoJSONLeftRight.remove();
       geoJSONRight.remove();
+      geoJSONRightLeft.remove();
       // add new geojsons
-      geoJSONLeft = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[0]; } });
-      geoJSONRight = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[1]; } });
+      geoJSONLeft = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[0]; }, style: leftLeftStyle });
+      geoJSONLeftRight = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[1]; }, style: leftRightStyle });
+      geoJSONRight = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[1]; }, style: rightRightStyle });
+      geoJSONRightLeft = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[0]; }, style: rightLeftStyle });
       geoJSONLeft.addTo(mapLeft);
+      geoJSONLeftRight.addTo(mapLeft);
       geoJSONRight.addTo(mapRight);
+      geoJSONRightLeft.addTo(mapRight);
       // update view
       mapLeft.setView(geoJSONRight.getBounds().getCenter(), 18);
       // update buttons
@@ -233,8 +281,65 @@
           aButton.classList.remove("disabled");
         };
       }
-    });
-    nextBtn.addTo(mapLeft);
+    }
+    function addButtonInContainer(image, name, container, position) {
+      const button = L.DomUtil.create('button',`leaflet-bar my-button leaflet-interactive ${position}`);
+      const img = L.DomUtil.create('img','',button);
+      img.src=image;
+      img.width=30;
+      img.height=30;
+      const span = L.DomUtil.create('span','label',button);
+      span.innerHTML=name;
+      document.getElementById(container).appendChild(button);
+      return button;
+    };
+    let saveBtn = addButtonInContainer("specification.svg", "Save", 'bottom-center', 'bottom-button');
+    saveBtn.onclick = async function() {
+      fileContent[login] = newValue;
+      const theContent = btoa(JSON.stringify(fileContent, undefined, 2));
+      await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+        owner: 'subdense',
+        repo: 'data',
+        path: `data_${currentFileIndex}.geojson`,
+        message: 'Data updated from annotator',
+        content: theContent,
+        sha: sha,
+        headers: { 'X-GitHub-Api-Version': '2022-11-28' }
+      });
+      console.log("all done!");
+      nextJSONFile();
+    }; 
+    // let nextBtn = addButtonInContainer("next.svg", "Next", 'bottom-center', 'bottom-button');
+    // nextBtn.onclick = async function() {
+    //   let nextFileContent = await readNextJSONFile();
+    //   fileContent = nextFileContent.fileContent;
+    //   sha = nextFileContent.sha;
+    //   // remove previous geojsons
+    //   geoJSONLeft.remove();
+    //   geoJSONRight.remove();
+    //   // add new geojsons
+    //   geoJSONLeft = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[0]; } });
+    //   geoJSONRight = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[1]; } });
+    //   geoJSONLeft.addTo(mapLeft);
+    //   geoJSONRight.addTo(mapRight);
+    //   // update view
+    //   mapLeft.setView(geoJSONRight.getBounds().getCenter(), 18);
+    //   // update buttons
+    //   newValue = fileContent[login];
+    //   if (newValue) {
+    //     // console.log("Value defined for ",login," = ", newValue);
+    //     for (const [aKey, aButton] of Object.entries(buttonDict)) {
+    //       if (aKey == newValue) aButton.classList.add("disabled");
+    //       else aButton.classList.remove("disabled");
+    //     };
+    //   } else {
+    //     newValue = "none";
+    //     // console.log(sha);
+    //     for (const [aKey, aButton] of Object.entries(buttonDict)) {
+    //       aButton.classList.remove("disabled");
+    //     };
+    //   }
+    // };
     const buttonNames = [
       ["creation.svg","Creation"],
       ["destruction.svg","Destruction"],
@@ -242,49 +347,53 @@
       ["stable.svg","Stable"],
       ["split.svg","Split"],
       ["reallocation.svg","Reallocation"],
-      ["specification.svg","Specification Change"]
+      ["skip.svg","Skip"]
+      // ["specification.svg","Specification Change"]
     ];
     var buttonDict = [];
-    buttonNames.forEach(myFunction);
-    function myFunction(value, index, array) {
-      // console.log(value, " ", index, " => ", array);
-      const button = L.DomUtil.create('button','leaflet-bar my-button leaflet-interactive');
+    buttonNames.forEach(addButton);
+    function addButton(value, index, array) {
+      const button = L.DomUtil.create('button','leaflet-bar my-button middle-button leaflet-interactive');
       const img = L.DomUtil.create('img','',button);
       img.src=value[0];
       img.width=30;
       img.height=30;
-      const span = L.DomUtil.create('span','tooltiptext',button);
+      const span = L.DomUtil.create('span','label',button);
       span.innerHTML=value[1];
-      let position = 50-((array.length/2)|0)*10+index*10;
-      button.style.left=`${position}%`;
       button.onclick = function(){
         newValue=value[1];
-        // console.log("newValue=",newValue);
-        for (const [aKey, aButton] of Object.entries(buttonDict)) {
-          // console.log(aKey," = ",aButton);
-          aButton.classList.remove("disabled");
-        };
+        for (const [aKey, aButton] of Object.entries(buttonDict)) { aButton.classList.remove("disabled"); };
         button.classList.add("disabled");
       }; 
-      document.getElementById('container').appendChild(button);
+      document.getElementById('center').appendChild(button);
       buttonDict[value[1]] = button;
-      // for (const [key, value] of Object.entries(buttonDict)) {
-      //   console.log(key, value);
-      // };
     }
     if (newValue) {
-      // console.log("Value defined for ",login," = ", newValue);
       for (const [aKey, aButton] of Object.entries(buttonDict)) {
         if (aKey == newValue) aButton.classList.add("disabled");
         else aButton.classList.remove("disabled");
       };
     } else {
       newValue = "none";
-      // console.log(sha);
       for (const [aKey, aButton] of Object.entries(buttonDict)) {
         aButton.classList.remove("disabled");
       };
     }
+  }
+  if (token) {
+    login = await authenticate(token);
+    console.log("token found. Logged in as:", login);
+    await readFileListAndCreateMaps();
+  } else {
+    showLogin();
+  }
+  loginBtn.addEventListener('click', async () => {
+    const token = document.getElementById("token").value;
+    login = await authenticate(token);
+    hideLogin();
+    // save token in local storage (browser)
+    localStorage.setItem("token", token);
+    await readFileListAndCreateMaps();
   });
 </script>
 </html>
