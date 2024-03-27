@@ -8,7 +8,7 @@
    version="1.1"
    id="svg5"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
-   sodipodi:docname="destruction.svg"
+   sodipodi:docname="save.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,9 +24,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="26.888281"
-     inkscape:cx="18.019002"
-     inkscape:cy="13.556092"
+     inkscape:zoom="20.375329"
+     inkscape:cx="5.9140149"
+     inkscape:cy="15.926123"
      inkscape:window-width="1850"
      inkscape:window-height="1016"
      inkscape:window-x="70"
@@ -40,19 +40,14 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.264592px;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 1.0002959,1.000296 H 4.0005 V 7.0002872 H 1.0002959 Z"
-       id="path42960"
-       sodipodi:nodetypes="ccccc" />
-    <path
-       style="fill:none;stroke:#000000;stroke-width:0.264592px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-dasharray:0.79377598,0.79377598;stroke-dashoffset:0"
-       d="M 4.0005,1.000296 H 7.0007041 V 7.0002872 H 4.0005 Z"
-       id="path42960-6"
-       sodipodi:nodetypes="ccccc" />
-    <path
-       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.265009;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-       d="m 3.000432,3.0002931 v 1.999997 L 5.000568,4.0002916 Z"
-       id="path42989"
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 1,5.9445 V 7 H 7 V 6.0555"
+       id="path69156"
        sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:#000000;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
+       d="M 3,1 H 5 V 4 H 6 L 4,6 2,4 h 1 z"
+       id="path69158"
+       sodipodi:nodetypes="cccccccc" />
   </g>
 </svg>

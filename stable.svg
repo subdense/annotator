@@ -25,8 +25,8 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="26.888281"
-     inkscape:cx="12.2916"
-     inkscape:cy="15.192492"
+     inkscape:cx="13.89081"
+     inkscape:cy="15.080919"
      inkscape:window-width="1850"
      inkscape:window-height="1016"
      inkscape:window-x="70"
@@ -34,34 +34,25 @@
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
-     id="defs2">
-    <marker
-       style="overflow:visible"
-       id="RoundedArrow"
-       refX="2.5"
-       refY="0"
-       orient="auto-start-reverse"
-       inkscape:stockid="RoundedArrow"
-       markerWidth="6.1347523"
-       markerHeight="5.9304953"
-       viewBox="0 0 6.1347524 5.9304951"
-       inkscape:isstock="true"
-       inkscape:collect="always"
-       preserveAspectRatio="xMidYMid">
-      <path
-         d="m 3.4825543,-2.873901 -4.4956038,2.24780197 a 0.7,0.7 0 0 0 0,1.25219806 L 3.4825543,2.873901 A 0.8652476,0.8652476 0 0 0 4.7347524,2.1 V -2.1 A 0.8652476,0.8652476 0 0 0 3.4825543,-2.873901 Z"
-         style="fill:context-stroke;fill-rule:evenodd;stroke:none;stroke-width:0.7"
-         id="path1367" />
-    </marker>
-  </defs>
+     id="defs2" />
   <g
      inkscape:label="Calque 1"
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-mid:url(#RoundedArrow)"
-       d="M 7,4 H 4 1.0287614"
-       id="path1680"
-       sodipodi:nodetypes="csc" />
+       style="fill:none;stroke:#000000;stroke-width:0.264592px;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 1.000296,1.000296 H 4.0005001 V 7.0002872 H 1.000296 Z"
+       id="path42960"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264592px;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 4.0005001,1.000296 H 7.0007042 V 7.0002872 H 4.0005001 Z"
+       id="path42960-6"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.265009;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       d="m 3.0004321,3.0002931 v 1.999997 l 2.000136,-0.9999985 z"
+       id="path42989"
+       sodipodi:nodetypes="cccc" />
   </g>
 </svg>
