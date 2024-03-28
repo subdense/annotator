@@ -36,7 +36,7 @@
       width: 30px;
       height: 30px;
       display: inline-block;
-      margin-right: 5px;
+      /* margin-right: 5px; */
       vertical-align: middle;
       background-color: transparent;
       background-position : center center;
@@ -72,6 +72,9 @@
     .group-1{
       margin-right: .5rem !important;
     }
+    .left-margin{
+      margin-left: 4px;
+    }
 	</style>
 </head>
 <body>
@@ -86,17 +89,17 @@
   </div>
   <div class="btn-toolbar justify-content-between" role="toolbar">
     <div class="btn-group btn-group-toggle group-1" role="group" data-toggle="buttons">
-      <button class="btn btn-secondary bouton-image construction" id="construction"><label class="d-none d-lg-inline-block">Construction</label></button>
-      <button class="btn btn-secondary bouton-image destruction" id="destruction"><label class="d-none d-lg-inline-block">Destruction</label></button>
-      <button class="btn btn-secondary bouton-image stable" id="stable"><label class="d-none d-lg-inline-block">Stable</label></button>
-      <button class="btn btn-secondary bouton-image merge" id="merge"><label class="d-none d-lg-inline-block">Merge</label></button>
-      <button class="btn btn-secondary bouton-image split" id="split"><label class="d-none d-lg-inline-block">Split</label></button>
-      <button class="btn btn-secondary bouton-image reallocation" id="reallocation"><label class="d-none d-lg-inline-block">Reallocation</label></button>
-      <button class="btn btn-secondary bouton-image skip" id="skip"><label class="d-none d-lg-inline-block">Skip</label></button>
+      <button class="btn btn-secondary bouton-image construction" id="construction"><label class="d-none d-lg-inline-block left-margin">Construction</label></button>
+      <button class="btn btn-secondary bouton-image destruction" id="destruction"><label class="d-none d-lg-inline-block left-margin">Destruction</label></button>
+      <button class="btn btn-secondary bouton-image stable" id="stable"><label class="d-none d-lg-inline-block left-margin">Stable</label></button>
+      <button class="btn btn-secondary bouton-image merge" id="merge"><label class="d-none d-lg-inline-block left-margin">Merge</label></button>
+      <button class="btn btn-secondary bouton-image split" id="split"><label class="d-none d-lg-inline-block left-margin">Split</label></button>
+      <button class="btn btn-secondary bouton-image reallocation" id="reallocation"><label class="d-none d-lg-inline-block left-margin">Reallocation</label></button>
+      <button class="btn btn-secondary bouton-image skip" id="skip"><label class="d-none d-lg-inline-block left-margin">Skip</label></button>
     </div>
     <!-- <button class="btn btn-primary bouton-image quality" id="quality">Quality</button> -->
     <div class="btn-group" role="group">
-      <button class="btn btn-primary bouton-image save" id="save"><label class="d-none d-lg-inline-block">Save</label></button>
+      <button class="btn btn-primary bouton-image save" id="save"><label class="d-none d-lg-inline-block left-margin">Save</label></button>
     </div>
   </div>
 </body>
