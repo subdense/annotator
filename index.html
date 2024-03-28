@@ -17,72 +17,59 @@
   <script src="./L.Map.Sync.js"></script>
   <!-- Bootstrap icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Bootstrap min -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 	<style>
 		html, body { height: 100%; margin: 0; }
     #top { position:absolute; text-align: center; width: 720px; bottom: 50%; left:50%;transform: translate(-50%, 0); z-index: 500;}
-		#container { height: 100%; width: 100%; }
+		#mycontainer { height: calc(100% - 44px); width: 100%; }
+		#buttons { height: 44px; width: 100%; }
 		.leaflet-container { height: 100%; width: 100%; max-width: 100%; max-height: 100%; }
     #mapLeft, #mapRight { width: 50%; height: 100%; }
     #mapLeft { float: left; }
     #mapRight { float: right; }
-    #center { position:absolute; text-align: center; width: 800px; bottom: 200px; left:50%;transform: translate(-50%, 0); z-index: 500;}
-    #bottom-center { position:absolute; text-align: center; width: 105px; bottom: 60px;left:50%;transform: translate(-50%, 0); z-index: 500;}
     .my-control { background-color : rgba(255,255,255,0.5); text-align: 'left' ; padding: 5px 5px}
-    .top-button {
-      top: 40%;
-    }
-    .middle-button { display: inline-block; position: relative; }
-    .bottom-button { display: inline-block; position: relative; }
-    .my-button {
-      background-color: white;
-      z-index: 500;
-      margin: 30px;
-    }
-    .my-button .label {
-      visibility: visible;
-      width: 100px;
-      background-color: #555;
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 5px 0;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -60px;
-      opacity: 1;
-      transition: opacity 0.3s;
-    }
-    .my-button .tooltiptext {
-      visibility: hidden;
-      width: 120px;
-      background-color: #555;
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 5px 0;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -60px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .my-button:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
-    .my-button .tooltiptext::after {
+    .bouton-image:before {
       content: "";
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px;
-      border-style: solid;
-      border-color: #555 transparent transparent transparent;
+      width: 30px;
+      height: 30px;
+      display: inline-block;
+      margin-right: 5px;
+      vertical-align: middle;
+      background-color: transparent;
+      background-position : center center;
+      background-repeat:no-repeat;
+    }
+    .construction:before{
+      background-image : url(creation.svg);
+    }
+    .destruction:before{
+      background-image : url(destruction.svg);
+    }
+    .merge:before{
+      background-image : url(merge.svg);
+    }
+    .stable:before{
+      background-image : url(stable.svg);
+    }
+    .split:before{
+      background-image : url(split.svg);
+    }
+    .reallocation:before{
+      background-image : url(reallocation.svg);
+    }
+    .skip:before{
+      background-image : url(skip.svg);
+    }
+    .save:before{
+      background-image : url(save.svg);
+    }
+    .quality:before{
+      background-image : url(quality.svg);
+    }
+    .group-1{
+      margin-right: .5rem !important;
     }
 	</style>
 </head>
@@ -92,11 +79,24 @@
     <input type="password" id="token" title="Paste your token from GitHub">
     <button class="login" id="login">Login</button>
   </div>
-  <div id="container">
+  <div id="mycontainer">
     <div id="mapLeft" class="map"></div>
     <div id="mapRight" class="map"></div>
-    <div id="center" class='center'></div>
-    <div id="bottom-center" class='bottom-center'></div>
+  </div>
+  <div class="btn-toolbar justify-content-between" role="toolbar">
+    <div class="btn-group btn-group-toggle group-1" role="group" data-toggle="buttons">
+      <button class="btn btn-secondary bouton-image construction" id="construction">Construction</button>
+      <button class="btn btn-secondary bouton-image destruction" id="destruction">Destruction</button>
+      <button class="btn btn-secondary bouton-image stable" id="stable">Stable</button>
+      <button class="btn btn-secondary bouton-image merge" id="merge">Merge</button>
+      <button class="btn btn-secondary bouton-image split" id="split">Split</button>
+      <button class="btn btn-secondary bouton-image reallocation" id="reallocation">Reallocation</button>
+      <button class="btn btn-secondary bouton-image skip" id="skip">Skip</button>
+    </div>
+    <!-- <button class="btn btn-primary bouton-image quality" id="quality">Quality</button> -->
+    <div class="btn-group" role="group">
+      <button class="btn btn-primary bouton-image save" id="save">Save</button>
+    </div>
   </div>
 </body>
 <script type="module">
@@ -116,6 +116,7 @@
     });
     const text = atob(result.data.content);
     let fileContent = JSON.parse(text), sha = result.data.sha;
+    // console.log(filePath," SHA = ",sha);
     return { fileContent, sha };
   }
   const token = localStorage.getItem("token");
@@ -136,10 +137,11 @@
   async function readFileListAndCreateMaps() {
     // Read the files from github
     const jsonFileContent = await readJSONFile('list.json')
-    const jsonContent = jsonFileContent.fileContent;
-    const dates = jsonContent["dates"];
-    const wmts = jsonContent["wmts"];
-    files = jsonContent["files"];
+    let listContent = jsonFileContent.fileContent;
+    let listSha = jsonFileContent.sha;
+    const dates = listContent["dates"];
+    const wmts = listContent["wmts"];
+    files = listContent["files"];
     const mapLeft  = L.map('mapLeft', {attributionControl: false});
     const mapRight = L.map('mapRight', { zoomControl: false });
     // Add a label on top right with user login
@@ -213,6 +215,9 @@
       "dashOffset": "10",
       "fill": false
     };
+    if (listContent[login]) {
+      currentFileIndex = listContent[login];
+    }
     let {fileContent,sha} = await readNextJSONFile();
     while (fileContent[login]) {
       let content = await readNextJSONFile();
@@ -231,6 +236,7 @@
     mapLeft.sync(mapRight);
     mapRight.sync(mapLeft);
     var newValue = fileContent[login];
+    var buttonDict = Object.fromEntries(["construction","destruction","stable","split","merge","reallocation","skip"].map((name)=>[name,document.getElementById(name)]));
     async function nextJSONFile() {
       let nextFileContent = await readNextJSONFile();
       fileContent = nextFileContent.fileContent;
@@ -254,31 +260,18 @@
       // update buttons
       newValue = fileContent[login];
       if (newValue) {
-        // console.log("Value defined for ",login," = ", newValue);
         for (const [aKey, aButton] of Object.entries(buttonDict)) {
-          if (aKey == newValue) aButton.classList.add("disabled");
-          else aButton.classList.remove("disabled");
+          if (aKey == newValue) aButton.classList.add("active");
+          else aButton.classList.remove("active");
         };
       } else {
         newValue = "none";
-        // console.log(sha);
         for (const [aKey, aButton] of Object.entries(buttonDict)) {
-          aButton.classList.remove("disabled");
+          aButton.classList.remove("active");
         };
       }
     }
-    function addButtonInContainer(image, name, container, position) {
-      const button = L.DomUtil.create('button',`leaflet-bar my-button leaflet-interactive ${position}`);
-      const img = L.DomUtil.create('img','',button);
-      img.src=image;
-      img.width=30;
-      img.height=30;
-      const span = L.DomUtil.create('span','label',button);
-      span.innerHTML=name;
-      document.getElementById(container).appendChild(button);
-      return button;
-    };
-    let saveBtn = addButtonInContainer("save.svg", "Save", 'bottom-center', 'bottom-button');
+    let saveBtn = document.getElementById("save");
     saveBtn.onclick = async function() {
       fileContent[login] = newValue;
       const theContent = btoa(JSON.stringify(fileContent, undefined, 2));
@@ -291,83 +284,32 @@
         sha: sha,
         headers: { 'X-GitHub-Api-Version': '2022-11-28' }
       });
-      console.log("all done!");
+      // update the list with the next file to annotate for this user
+      listContent[login] = currentFileIndex;
+      const theNewJsonContent = btoa(JSON.stringify(listContent, undefined, 2));
+      await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+        owner: 'subdense',
+        repo: 'data',
+        path: 'list.json',
+        message: 'Data updated from annotator',
+        content: theNewJsonContent,
+        sha: listSha,
+        headers: { 'X-GitHub-Api-Version': '2022-11-28' }
+      });
+      // reread the list file to get the proper sha
+      const jsonFileContent = await readJSONFile('list.json')
+      listContent = jsonFileContent.fileContent;
+      listSha = jsonFileContent.sha;
+      // console.log("all done!");
       nextJSONFile();
     }; 
-    // let nextBtn = addButtonInContainer("next.svg", "Next", 'bottom-center', 'bottom-button');
-    // nextBtn.onclick = async function() {
-    //   let nextFileContent = await readNextJSONFile();
-    //   fileContent = nextFileContent.fileContent;
-    //   sha = nextFileContent.sha;
-    //   // remove previous geojsons
-    //   geoJSONLeft.remove();
-    //   geoJSONRight.remove();
-    //   // add new geojsons
-    //   geoJSONLeft = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[0]; } });
-    //   geoJSONRight = L.geoJSON(fileContent, { filter: function(feature, layer) { return feature.properties.date == dates[1]; } });
-    //   geoJSONLeft.addTo(mapLeft);
-    //   geoJSONRight.addTo(mapRight);
-    //   // update view
-    //   mapLeft.setView(geoJSONRight.getBounds().getCenter(), 18);
-    //   // update buttons
-    //   newValue = fileContent[login];
-    //   if (newValue) {
-    //     // console.log("Value defined for ",login," = ", newValue);
-    //     for (const [aKey, aButton] of Object.entries(buttonDict)) {
-    //       if (aKey == newValue) aButton.classList.add("disabled");
-    //       else aButton.classList.remove("disabled");
-    //     };
-    //   } else {
-    //     newValue = "none";
-    //     // console.log(sha);
-    //     for (const [aKey, aButton] of Object.entries(buttonDict)) {
-    //       aButton.classList.remove("disabled");
-    //     };
-    //   }
-    // };
-    const buttonNames = [
-      ["creation.svg","Creation"],
-      ["destruction.svg","Destruction"],
-      ["merge.svg","Merge"],
-      ["stable.svg","Stable"],
-      ["split.svg","Split"],
-      ["reallocation.svg","Reallocation"],
-      ["skip.svg","Skip"]
-      // ["specification.svg","Specification Change"]
-    ];
-    var buttonDict = [];
-    buttonNames.forEach(addButton);
-    function addButton(value, index, array) {
-      const button = L.DomUtil.create('button','leaflet-bar my-button middle-button leaflet-interactive');
-      const img = L.DomUtil.create('img','',button);
-      img.src=value[0];
-      img.width=30;
-      img.height=30;
-      const span = L.DomUtil.create('span','label',button);
-      span.innerHTML=value[1];
-      button.onclick = function(){
-        newValue=value[1];
-        for (const [aKey, aButton] of Object.entries(buttonDict)) { aButton.classList.remove("disabled"); };
-        button.classList.add("disabled");
-      }; 
-      document.getElementById('center').appendChild(button);
-      buttonDict[value[1]] = button;
-    }
-    if (newValue) {
-      for (const [aKey, aButton] of Object.entries(buttonDict)) {
-        if (aKey == newValue) aButton.classList.add("disabled");
-        else aButton.classList.remove("disabled");
-      };
-    } else {
-      newValue = "none";
-      for (const [aKey, aButton] of Object.entries(buttonDict)) {
-        aButton.classList.remove("disabled");
-      };
-    }
+    for (const [aKey, aButton] of Object.entries(buttonDict)) {
+      aButton.onclick = function(){ newValue=aKey; };
+    };
   }
   if (token) {
     login = await authenticate(token);
-    console.log("token found. Logged in as:", login);
+    // console.log("token found. Logged in as:", login);
     await readFileListAndCreateMaps();
   } else {
     showLogin();
