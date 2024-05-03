@@ -43,6 +43,10 @@
       <button class="btn btn-secondary bouton-image reallocation" id="reallocation"><label class="d-none d-lg-inline-block left-margin">Reallocation</label></button>
       <button class="btn btn-secondary bouton-image skip" id="skip"><label class="d-none d-lg-inline-block left-margin">Skip</label></button>
     </div>
+    <div class="btn btn-secondary form-check">
+      <input class="form-check-input" type="checkbox" value="" id="qualityIssue">
+      <label class="form-check-label" for="qualityIssue">Quality issue</label>
+    </div>
     <!-- <button class="btn btn-primary bouton-image quality" id="quality">Quality</button> -->
     <div class="btn-group" role="group">
       <button class="btn btn-primary bouton-image save" id="save"><label class="d-none d-lg-inline-block left-margin">Save</label></button>
@@ -186,7 +190,20 @@
     mapLeft.sync(mapRight);
     mapRight.sync(mapLeft);
     var newValue = fileContent[login];
+    console.log("newValue from file = ", newValue);
+    if (!newValue) {
+      newValue = {"tag": "none", "qualityIssue": false};
+    }
+    console.log("newValue = ", newValue);    
     var buttonDict = Object.fromEntries(["construction","destruction","stable","split","merge","reallocation","skip"].map((name)=>[name,document.getElementById(name)]));
+    function updateButtons() {
+      for (const [aKey, aButton] of Object.entries(buttonDict)) {
+        if (aKey == newValue["tag"]) aButton.classList.add("active");
+        else aButton.classList.remove("active");
+      };
+      document.getElementById("qualityIssue").checked = newValue["qualityIssue"];
+    }
+    updateButtons();
     async function nextJSONFile() {
       let nextFileContent = await readNextJSONFile();
       fileContent = nextFileContent.fileContent;
@@ -209,21 +226,16 @@
       mapLeft.setView(geoJSONRight.getBounds().getCenter(), 18);
       // update buttons
       newValue = fileContent[login];
-      if (newValue) {
-        for (const [aKey, aButton] of Object.entries(buttonDict)) {
-          if (aKey == newValue) aButton.classList.add("active");
-          else aButton.classList.remove("active");
-        };
-      } else {
-        newValue = "none";
-        for (const [aKey, aButton] of Object.entries(buttonDict)) {
-          aButton.classList.remove("active");
-        };
+      console.log("newValue from file = ", newValue);
+      if (!newValue) {
+        newValue = {"tag": "none", "qualityIssue": false};
       }
+      updateButtons();
     }
     let saveBtn = document.getElementById("save");
     saveBtn.onclick = async function() {
       fileContent[login] = newValue;
+      console.log("newValue = ", newValue);
       const theContent = btoa(JSON.stringify(fileContent, undefined, 2));
       await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
         owner: 'subdense',
@@ -254,8 +266,9 @@
       nextJSONFile();
     }; 
     for (const [aKey, aButton] of Object.entries(buttonDict)) {
-      aButton.onclick = function(){ newValue=aKey; };
+      aButton.onclick = function(){ newValue["tag"]=aKey; };
     };
+    document.getElementById("qualityIssue").onclick = function() { newValue["qualityIssue"]=document.getElementById("qualityIssue").checked; }
   }
   if (token) {
     login = await authenticate(token);
