@@ -41,6 +41,7 @@ async function loadPage(page, title) {
     switch (page) {
         case routes.index:
             app.innerHTML = await (await fetch("pages/home.html")).text()
+            cleanProgresBarNav()
             break
         case routes.profile:
             app.innerHTML = await (await fetch("pages/profile.html")).text()
@@ -69,6 +70,7 @@ function handleLinks() {
 }
 
 function loadDashboard() {
+    cleanProgresBarNav()
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
     if (token && username) {
@@ -134,9 +136,12 @@ function fisherYatesShuffle(arr) {
         [arr[i], arr[j]] = [arr[j], arr[i]];          // swap
     }
 }
+function cleanProgresBarNav() {
+    document.getElementById("progressbarNav").innerHTML = ""
+}
 function updateProgressBarNav(current,max) {
+    cleanProgresBarNav()
     let pbn = document.getElementById("progressbarNav")
-    pbn.innerHTML = ""
     let pbnDiv = document.createElement("div")
     pbnDiv.className = "p-0"
     let pbnDivName = document.createElement("div")
